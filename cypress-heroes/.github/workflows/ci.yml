@@ -1,26 +1,42 @@
-name: CI
+name: Cypress E2E Tests
 
-on : [push]
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
 jobs:
-    build-test:
-        runs-on: ubuntu-20.04
-        steps:
+  test:
+    runs-on: ubuntu-latest
 
-            - name: Checkout
-              uses: actions/checkout@v3
+    steps:
+      - name: ⬇️ Checkout do código
+        uses: actions/checkout@v4
 
-            - name: cypress Testes
-              uses: cypress-io/github-actions@v5
-              with:
-                start: 'npm run dev'
-                build: 'npm run build'
-            -uses: actions/upload-artifact@v3
-            if: always()
-            with:
-                name: Cypress Result
-                path: |
-                    cypress/screenshots
-                    cypress/videos
-                    cypress/results
-                if-no-files-found: ignore
-                
+      - name: 🔧 Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: 📦 Instalar dependências do monorepo
+        run: npm install
+
+      - name: 🚀 Iniciar app (client + server)
+        run: npm run start:ci &
+        env:
+          CI: true
+
+      - name: ⏳ Aguardar aplicação estar pronta
+        uses: jakejarvis/wait-for-netlify-action@v1
+        with:
+          url: http://localhost:3000
+          timeout: 60
+
+      - name: 🧪 Rodar testes E2E do Cypress
+        uses: cypress-io/github-action@v6
+        with:
+          start: npm run start:ci
+          wait-on: http://localhost:3000
+          wait-on-timeout: 60
+          browser: chrome

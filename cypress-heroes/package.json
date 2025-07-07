@@ -34,5 +34,9 @@
   },
   "prisma": {
     "schema": "server/prisma/schema.prisma"
-  }
+  },
+  "scripts": {
+  "dev": "vite", // ou outro comando que inicie seu frontend
+  "test": "cypress run"
+}
 }
