@@ -1,0 +1,34 @@
+name: Cypress E2E Tests - Custom
+
+on:
+  push:
+    branches: [main, cypress-ci]
+  pull_request:
+    branches: [main, cypress-ci]
+
+jobs:
+  cypress-tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./cypress-heroes  # ajuste se necessário
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Start Vite server
+        run: npm run dev &
+        env:
+          CI: true
+
+      - name: Wait for localhost:3000
+        uses: jakejarvis/wait-for-netlify-action
